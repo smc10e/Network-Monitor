@@ -1,8 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
@@ -13,13 +11,16 @@ import java.util.regex.Pattern;
  */
 public class Network_Monitor {
 
+    private static long sum = 0;
+    private static Boolean kb = false;
+
     public static void main(String[] args) throws InterruptedException {
 
         StringBuffer output;
         Process p;
         BufferedReader reader;
         String line, text, received;
-        long sum = 0, oldVal = 0, newVal= 0;
+        long oldVal = 0, newVal;
         Pattern pattern;
         Matcher matcher;
 
@@ -29,10 +30,11 @@ public class Network_Monitor {
         JTextArea textArea2 = new JTextArea();
         JLabel label = new JLabel();
         JLabel label2 = new JLabel();
+        JButton button = new JButton("Toggle Kb");
         frame.setVisible(true);
         frame.setLayout(new FlowLayout());
         frame.setLocationRelativeTo(null);
-        frame.setSize(300, 100);
+        frame.setSize(400, 200);
         label.setText("Bytes Received: ");
         label2.setText("Bytes received since program start: ");
         textArea.setEditable(false);
@@ -41,6 +43,18 @@ public class Network_Monitor {
         frame.add(textArea);
         frame.add(label2);
         frame.add(textArea2);
+        long val = 0;
+
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                kb = !kb;
+            }
+        };
+
+        button.addActionListener(actionListener);
+        frame.add(button);
+
         WindowListener windowListener = new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -79,6 +93,12 @@ public class Network_Monitor {
             //computes number of bytes received since start of program
             if(oldVal>0) {
                 sum += (newVal - oldVal);
+                if(kb ==false) {
+                    val = sum;
+                }
+                else{
+                    val = sum/1024;
+                }
             }
             oldVal = newVal;
 
@@ -86,7 +106,7 @@ public class Network_Monitor {
             textArea.setText(" ");
             textArea.append(received);
             textArea2.setText(" ");
-            textArea2.append(String.valueOf(sum));
+            textArea2.append(String.valueOf(val));
             Thread.sleep(500);
         }
     }
